@@ -5,7 +5,11 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Link} from 'react-router-dom';
 import "./Navbar.scss"
+import { useState } from 'react';
+import Cart from '../Cart/Cart';
 const Navbar = () => {
+
+  const [open,setopen]= useState(false);
   return (
     <div className='navbar'>   
          
@@ -83,8 +87,8 @@ const Navbar = () => {
       
           <FavoriteIcon/>
            
-           <div>
-          <ShoppingCartIcon/>
+           <div className='cartIcon' onClick={()=>setopen(!open)}>
+          < ShoppingCartIcon />
 
           <span>0</span>
           </div>
@@ -97,6 +101,7 @@ const Navbar = () => {
 
 
       </div>
+      {open && <Cart/>}
     </div>
   )
 }

@@ -1,26 +1,38 @@
-
+import React from "react";
 import "./Card.scss";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-const Card = ({ item }) => { // Accept 'item' as a prop
+const Card = ({ item }) => {
+  console.log(item);
+  const upload = import.meta.env.VITE_REACT_APP_API_UPLOAD;
   return (
-    <Link to={`/product/${item.id}`}>
-      <div className='card'>
-       
+    <Link className="link" to={`/product/${item.id}`}>
+      <div className="card">
         <div className="image">
-          <img src={item.img} alt="" className='mainimage' />
-          <img src={item.img} alt="" className='secondimage' />
-        
-          </div>
-          <h3>{item.title}</h3>
-          <div className="prices">
-            <h2>{item.oldprice}</h2>
-            <h2>{item.price}</h2>
-          </div>
+          {item?.attributes.isNew && <span>New Season</span>}
+          <img
+            src={
+            upload+ item.attributes?.img?.data?.attributes?.url
+            }
+            alt=""
+            className="mainImg"
+          />
+          <img
+            src={
+              upload + item.attributes?.img2?.data?.attributes?.url
+            }
+            alt=""
+            className="secondImg"
+          />
         </div>
-      
+        <h2>{item?.attributes.title}</h2>
+        <div className="prices">
+          <h3>${item.oldPrice || item?.attributes.price + 20}</h3>
+          <h3>${item?.attributes.price}</h3>
+        </div>
+      </div>
     </Link>
   );
-}
+};
 
 export default Card;
