@@ -27,12 +27,12 @@ const Navbar = () => {
         </div>
         
         <div className="item">
-        <Link className='link' to='/products/1'>Men</Link >
+        <Link className='link' to='/products/1'>Women</Link >
           
         </div>
         
         <div className="item">
-          <Link className='link' to='/products/2'>Women</Link >
+          <Link className='link' to='/products/2'>Men</Link >
           
         </div>
         

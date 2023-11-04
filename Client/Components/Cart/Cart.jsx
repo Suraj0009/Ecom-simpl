@@ -1,55 +1,71 @@
-import React from 'react'
-import "./cart.scss"
-import DeleteIcon from '@mui/icons-material/Delete';
+
+import "./cart.scss";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { useSelector } from "react-redux";
+import { removeItem, resetCart } from "..//..//src/Redux/cartReducer";
+import { useDispatch } from "react-redux";
+import { loadStripe } from "@stripe/stripe-js";
+import { makeRequest } from "..//..//src/makeRequest";
+
+const upload= import.meta.env.VITE_REACT_APP_API_UPLOAD;
 const Cart = () => {
-  const data = [
-    {
-      id: 1,
-      title: "Jeans rocky",
-      img: "https://images.pexels.com/photos/1306248/pexels-photo-1306248.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      oldprice: "$100",
-      price: "$80",
-      desc:"pants",
-    },
-    {
-      id: 2,
-      title: "Specs",
-      img: "https://images.pexels.com/photos/1192609/pexels-photo-1192609.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      oldprice: "$120",
-      price: "$90",
-      desc:"pants",
-    },
-  ];
+  const products = useSelector((state) => state.cart.products);
+  const dispatch = useDispatch();
+
+  const totalPrice = () => {
+    let total = 0;
+    products.forEach((item) => {
+      total += item.quantity * item.price;
+    });
+    return total.toFixed(2);
+  };
+
+  const stripePromise = loadStripe(
+    "pk_test_51O67LWSHCMyz6hsW8kVIvJ4h2VUJ0xVAI4oZfqLhmt1ExJxHODsXzkZBMJ2BtXrPY49VZXdL2s6ugTjjqKrq3Pe000gMY4dMXv"
+  );
+  const handlePayment = async () => {
+    try {
+      const stripe = await stripePromise;
+      const res = await makeRequest.post("/orders", {
+        products,
+      });
+      await stripe.redirectToCheckout({
+        sessionId: res.data.stripeSession.id,
+      });
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
-    <div className='cart'>
-     
-      <h1> IN CART</h1>
-      {data?.map(item=>(
+    <div className="cart">
+      <h1>Products in your cart</h1>
+      {products?.map((item) => (
         <div className="item" key={item.id}>
-          <img src={item.img} alt="" />
-
+          <img src={upload + item.img} alt="" />
           <div className="details">
-          <h1>{item.title}</h1>
-          <p> {item.desc?.substring(0,100)}</p>
-          <div className="price">
-            1 x ${item.price}
+            <h1>{item.title}</h1>
+            <p>{item.desc?.substring(0, 100)}</p>
+            <div className="price">
+              {item.quantity} x ${item.price}
+            </div>
           </div>
-          </div>
-          <DeleteIcon className='delete'/>
-           </div>
+          <DeleteOutlinedIcon
+            className="delete"
+            onClick={() => dispatch(removeItem(item.id))}
+          />
+        </div>
       ))}
-      
       <div className="total">
-        <span>SUBTOTAL </span>
-        <span>$123 </span>
+        <span>SUBTOTAL</span>
+        <span>${totalPrice()}</span>
       </div>
-      <button> PROCEED TO CHECKOUT</button>
-      <span className='reset'>Reset Cart</span>
-
-
-
+      <button onClick={handlePayment}>PROCEED TO CHECKOUT</button>
+      <span className="reset" onClick={() => dispatch(resetCart())}>
+        Reset Cart
+      </span>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

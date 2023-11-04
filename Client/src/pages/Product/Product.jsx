@@ -1,57 +1,99 @@
 import { useState } from "react";
-import "./product.scss"
-import BalanceIcon from '@mui/icons-material/Balance';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import "./Product.scss";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import BalanceIcon from "@mui/icons-material/Balance";
+import useFetch from "../../../Components/hooks/useFetch";
+import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartReducer";
+
+
+const upload = import.meta.env.VITE_REACT_APP_API_UPLOAD;
 const Product = () => {
-   
-  const[selectedImg,setselectedImg]=useState(0);
-  const[quantity,setQuantity]=useState(1);
+  const id = useParams().id;
+  const [selectedImg, setSelectedImg] = useState("img");
+  const [quantity, setQuantity] = useState(1);
 
-  const images = [
-    "https://images.pexels.com/photos/17403707/pexels-photo-17403707/free-photo-of-young-man-in-a-trendy-outfit-posing-outdoors.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    "https://images.pexels.com/photos/17403708/pexels-photo-17403708/free-photo-of-young-man-in-a-trendy-outfit-posing-outdoors.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-  ];
-
-  
+  const dispatch = useDispatch();
+  const { data, loading, error } = useFetch(`/products/${id}?populate=*`);
 
   return (
     <div className="product">
-
-<div className="left">
-  <div className="images">
-    <img src={images[0]} alt="" onClick={() => setselectedImg(0)} />
-    <img src={images[1]} alt="" onClick={() => setselectedImg(1)} />
-  </div>
-</div>
-
-      <div className="mainImg">
-        <img src={images[selectedImg]} alt="" />
-      </div>
-      <div className="right">
-             
-             <h1>Cargo Jeans</h1>
-             <span className="price"> $200</span>
-             <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam quisquam, harum qui assumenda cum tempore voluptatum ducimus eos p
-              erspiciatis mollitia natus impedit officia modi atque sit porro libero quaerat similique! </p>        
-
-              <div className="quantity">
-                <button onClick={ ()=>setQuantity((prev) => (prev===1? 1: prev-1 ) )  }>-</button>
-                   {quantity}
-                <button onClick={ ()=>setQuantity ((prev) => prev+1) }>+</button>
-                  
-              </div>
-
-              <button className="add"> 
-               
-               <AddShoppingCartIcon/>Add to cart
-               
+      {loading ? (
+        "loading"
+      ) : (
+        <>
+          <div className="left">
+            <div className="images">
+              <img
+                src={
+                  upload +
+                  data?.attributes?.img?.data?.attributes?.url
+                }
+                alt=""
+                onClick={(e) => setSelectedImg("img")}
+              />
+              <img
+                src={
+                  upload +
+                  data?.attributes?.img2?.data?.attributes?.url
+                }
+                alt=""
+                onClick={(e) => setSelectedImg("img2")}
+              />
+            </div>
+            <div className="mainImg">
+              <img
+                src={
+                  upload +
+                  data?.attributes[selectedImg]?.data?.attributes?.url
+                }
+                alt=""
+              />
+            </div>
+          </div>
+          <div className="right">
+            <h1>{data?.attributes?.title}</h1>
+            <span className="price">${data?.attributes?.price}</span>
+            <p>{data?.attributes?.desc}</p>
+            <div className="quantity">
+              <button
+                onClick={() =>
+                  setQuantity((prev) => (prev === 1 ? 1 : prev - 1))
+                }
+              >
+                -
               </button>
-              <div className="links">
-                <div className="item"> <FavoriteIcon/>ADD TO WISHLIST  </div>
-                <div className="item"> <BalanceIcon/> COMPARE </div>
+              {quantity}
+              <button onClick={() => setQuantity((prev) => prev + 1)}>+</button>
+            </div>
+            <button
+              className="add"
+              onClick={() =>
+                dispatch(
+                  addToCart({
+                    id: data.id,
+                    title: data.attributes.title,
+                    desc: data.attributes.desc,
+                    price: data.attributes.price,
+                    img: data.attributes.img.data.attributes.url,
+                    quantity,
+                  })
+                )
+              }
+            >
+              <AddShoppingCartIcon /> ADD TO CART
+            </button>
+            <div className="links">
+              <div className="item">
+                <FavoriteBorderIcon/> ADD TO WISH LIST
               </div>
-              <div className="info">
+              <div className="item">
+                <BalanceIcon /> ADD TO COMPARE
+              </div>
+            </div>
+            <div className="info">
               <span>Vendor: Polo</span>
               <span>Product Type: T-Shirt</span>
               <span>Tag: T-Shirt, Women, Top</span>
@@ -64,11 +106,11 @@ const Product = () => {
               <hr />
               <span>FAQ</span>
             </div>
-      </div>
-      
-      
+          </div>
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default Product
